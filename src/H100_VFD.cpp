@@ -43,6 +43,30 @@ bool H100VFD::begin(uint32_t baudRate = 19200) {
     _node.preTransmission(H100VFD::preTransmission); // Use class scope
     _node.postTransmission(H100VFD::postTransmission); // Use class scope
 
+    uint16_t P147 = read16BitParameter(147);
+
+    if(lastErrorCode != ModbusMaster::ku8MBSuccess){
+      return false;
+    }
+      
+    switch (P147){
+    case 0:
+      MaxSpeed = 100000;
+      break;
+    case 1:
+      MaxSpeed = 10000;
+      break;
+    case 2:
+      MaxSpeed = 1000;
+      break;
+    case 3:
+      MaxSpeed = 100;
+      break;
+    default:
+      lastErrorCode = INVALID_READ_VALUE;
+      break;
+    }
+
     return true; 
 
 }
@@ -246,7 +270,6 @@ double H100VFD::readInverterFunction(Function function) {
         case Function::OUTPUT_VOLTAGE:       value /= 10.0f;     break; // 1 decimal place
         case Function::OUTPUT_TORQUE:        value /= 1000.0f;   break; // 3 decimal places
         case Function::DC_VOLTAGE:           value /= 10.0f;     break; // 1 decimal place
-        case Function::INVERTER_TEMPERATURE: value /= 10.0f;     break; // 1 decimal place
         case Function::POWER:                value /= 1000.0f;   break; // 3 decimal places
         case Function::ENERGY_CONSUMPTION:   value /= 1000.0f;   break; // 3 decimal places
         case Function::HOURS_OF_POWER_ON:    value /= 1000.0f;   break; // 3 decimal places

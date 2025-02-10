@@ -106,6 +106,9 @@ public:
     uint8_t lastErrorCode;       // Last error code
     String getLastErrorStr();   // Error code as human readable string
     static constexpr uint8_t INVALID_BAUD = 0xA0; // Error for invalid baud rate
+    static constexpr uint8_t INVALID_READ_VALUE = 0xA1; // Value read is outside expected bounds
+
+    uint32_t MaxSpeed;
 
 private:
    private:
@@ -117,10 +120,10 @@ private:
     
 
     // Define Modbus registers (addresses) - Moved to private
-    static constexpr uint16_t SPEED_ADDR = 0x2000; 
-    static constexpr uint16_t CONTROL_ADDR = 0x2002;
-    static constexpr uint16_t STATUS_ADDR = 0x2004;
-    static constexpr uint16_t FAULT_ADDR = 0x2006;
+    static constexpr uint16_t SPEED_ADDR = 0xC121; 
+    static constexpr uint16_t CONTROL_ADDR = 0x8122;
+    static constexpr uint16_t STATUS_ADDR = 0x03F6;
+    static constexpr uint16_t FAULT_ADDR = 0x43F7;
 
     // Helper functions for Modbus communication
     uint16_t read16Bit(uint16_t registerAddress);

@@ -1,50 +1,59 @@
 #include "H100_VFD.h"
 
+// Slave address of VFD, default is 1
 constexpr  uint8_t SLAVE_ADDRESS = 0x01;
 
-constexpr uint8_t MAX485_PIN = 26;
+// Control pin for MAX485 TX/RX enable (RE/DE)
+constexpr uint8_t MAX485_PIN = 24;
 
+// Define vfd object with parameters
 H100VFD vfd(SLAVE_ADDRESS, Serial2, MAX485_PIN);
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(9600); // Start serial for debug
 
-  if(!vfd.begin(19200))
+  delay(500); // Small delay for serial monitor
+  Serial.println("");
+
+  if(!vfd.begin(19200)){
     Serial.println(F("VFD failed to start"));
+    return; // Stop program if VFD does not initialize
+  }
 
-  Serial.print(vfd.getStatusCode());
-  Serial.print("\t");
-  delay(100); // Wait between modbus commands
-
-  Serial.println(vfd.getStatusStr());
-  delay(100); // Wait between modbus commands
-
-  Serial.print(F("Inverter Temp: "));
-  Serial.println(vfd.readInverterFunction(Function::INVERTER_TEMPERATURE));
-  delay(100); // Wait between modbus commands
+  // Need short delay between modbus commands to prevent errors
+  // Can reduce delay but must varrify function
+  delay(10);
   
-  vfd.setFrequency(100000); // 100%
-  delay(100); // Wait between modbus commands
+  // Get Status as a string
+  Serial.print("Status String: ");
+  Serial.println(vfd.getStatusStr());
+  delay(10); // Wait between modbus commands
 
+  // Set Frequancy to 100%
+  vfd.setFrequency(vfd.MaxSpeed); // Max speed value will set frequacny to 100% of max frequancy value (P5.08)
+  delay(10); // Wait between modbus commands
+
+  // Command VFD start
   vfd.setCommand(Command::START);
+  Serial.println("Forward 100%");
+  delay(20000); // Wait for full ramp, depends on acceleration settings
 
-  delay(8000); // Wait for ramp
+  // Slow to 50%
+  vfd.setFrequency(vfd.MaxSpeed*0.5); // Sets frequency to half of maximum 
+  Serial.println("50%");
+  delay(10000); //Wait for slowdown
 
-  vfd.setCommand(Command::REVERSE);
+  // Set motor to start at same frequancy in reverce
+  vfd.setCommand(Command::START_REVERSE);
+  Serial.println("Reverce 50%");
+  delay(20000); // Wait for full reverce
 
-  delay(10000); // Wait for full reverce
-
-  vfd.setFrequency(50000); //Half freq
-
-  delay(5000); // Wait for slowdown
-
+  // Stop the VFD
   vfd.setCommand(Command::STOP);
-  delay(100); // Wait between modbus commands
-
-  Serial.print("P2.18 value: ");
-  Serial.println(vfd.read16BitParameter(218)); // Read param P2.18, Max speed setting
-
+  Serial.println("Stop");
+  delay(10); // Wait between modbus commands
+  
 }
 
 void loop() {
