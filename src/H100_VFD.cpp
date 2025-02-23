@@ -14,11 +14,26 @@ H100VFD::H100VFD(uint8_t slaveAddress, HardwareSerial &serial, uint8_t MAX485Con
     }
 }
 
-// Initialize the VFD connection using a specific serial port.
+// Initialize the VFD connection at specific baudrate
 bool H100VFD::begin(uint32_t baudRate = 19200) {
 
     // Check if the baud rate is valid
     switch (baudRate) {
+        case 0:
+            H100VFD::_baudRate = 2400;
+            break;
+        case 1:
+            H100VFD::_baudRate = 4800;
+            break;
+        case 2:
+            H100VFD::_baudRate = 9600;
+            break;
+        case 3:
+            H100VFD::_baudRate = 19200;
+            break;
+        case 4:
+            H100VFD::_baudRate = 38400;
+            break;
         case 2400:
         case 4800:
         case 9600:
@@ -28,13 +43,13 @@ bool H100VFD::begin(uint32_t baudRate = 19200) {
             H100VFD::_baudRate = baudRate; // Set baud rate if valid
             break;
         default:
-            lastErrorCode = H100VFD::INVALID_BAUD;
+            lastErrorCode = INVALID_BAUD;
             return false; // Invalid baud rate
     } 
 
     // Start Serial Communications
     _serial.end();
-    _serial.begin(baudRate);    // Baud rate for Modbus communication.
+    _serial.begin(_baudRate);    // Baud rate for Modbus communication.
 
     pinMode(_MAX485ControlPin, OUTPUT);
     digitalWrite(_MAX485ControlPin, LOW);    // Start in receive mode
@@ -119,6 +134,10 @@ bool H100VFD::write32Bit(uint16_t registerAddress, uint32_t value) {
 
 // Set the motor frequency (32-bit operation).
 bool H100VFD::setFrequency(uint32_t frequency) {
+  if(frequency > MaxSpeed){
+    
+    return false;
+  }
   return write32Bit(SPEED_ADDR, frequency);
 }
 
@@ -319,6 +338,8 @@ String H100VFD::getLastErrorStr() {
           return F("Invalid CRC");
       case H100VFD::INVALID_BAUD:
           return F("Invalid Baud Rate");
+      case H100VFD::INVALID_READ_VALUE:
+          return F("Read Value is out of expected bounds");
       default:
           return F("Unknown error");
     }

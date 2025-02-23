@@ -18,6 +18,8 @@ void setup() {
 
   if(!vfd.begin(19200)){
     Serial.println(F("VFD failed to start"));
+    Serial.print("Last Error: ");
+    Serial.println(vfd.getLastErrorStr()); // Print last error
     return; // Stop program if VFD does not initialize
   }
 
@@ -26,8 +28,8 @@ void setup() {
   delay(10);
   
   // Get Status as a string
-  Serial.print("Status String: ");
-  Serial.println(vfd.getStatusStr());
+  Serial.print(F("Status String: ")); // Note using 'F("")' stores the string in flash memory instead of RAM
+  Serial.println(vfd.getStatusStr()); // Get and display status as a readable string
   delay(10); // Wait between modbus commands
 
   // Set Frequancy to 100%

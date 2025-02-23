@@ -18,6 +18,8 @@ void setup() {
 
   if(!vfd.begin(19200)){
     Serial.println(F("VFD failed to start"));
+    Serial.print("Last Error: ");
+    Serial.println(vfd.getLastErrorStr()); // Print last error
     return; // Stop program if VFD does not initialize
   }
     
@@ -26,7 +28,7 @@ void setup() {
   Serial.println(vfd.getStatusStr()); // Get and display status as a readable string
   delay(10); // Wait between modbus commands
 
-  Serial.println("\nReading inverter functions...");
+  Serial.println(F("\nReading inverter functions..."));
 
   // Read all inverter functions, returns adjusted float value   
   // To read raw integer value use read16BitParameter or read32BitParameter functions
